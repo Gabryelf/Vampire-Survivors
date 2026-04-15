@@ -1,4 +1,3 @@
-
 // ============================================================
 // state.js - Состояние игры
 // ============================================================
@@ -8,13 +7,11 @@ var GameState = (function() {
     let isPlaying = false;
     let isPaused = false;
     
-    // Игрок
     let player = {
         x: 0,
         y: 0,
         health: 100,
-        element: null,
-        gun: null
+        gunAngle: 0  
     };
     
     // Игровые объекты
@@ -63,6 +60,7 @@ var GameState = (function() {
             isPlaying = true;
             isPaused = false;
             player.health = 100;
+            player.gunAngle = 0;  
             ammoCount = GameConfig.GAME_PARAMS.MAX_AMMO;
             bullets = [];
             enemies = [];
@@ -82,9 +80,8 @@ var GameState = (function() {
             player.y = y;
         },
         
-        setPlayerElement: function(element, gun) {
-            player.element = element;
-            player.gun = gun;
+        setGunAngle: function(angle) {  
+            player.gunAngle = angle;
         },
         
         addBullet: function(bullet) {

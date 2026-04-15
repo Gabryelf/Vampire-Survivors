@@ -43,6 +43,9 @@ var GameUI = (function() {
         elements.playerHpWrap = document.getElementById('player-healthbar-wrap');
         elements.playerHpFill = document.getElementById('player-healthbar-fill');
         elements.playerHpValue = document.getElementById('player-hp-value');
+        
+        elements.soundButton = document.getElementById('sound-button');
+        elements.soundToggle = document.getElementById('sound-toggle');
 
         // Проверяем каждый критический элемент
         var missingElements = [];
@@ -54,7 +57,6 @@ var GameUI = (function() {
 
         if (missingElements.length > 0) {
             console.error('Не найдены элементы DOM:', missingElements.join(', '));
-            console.log('Текущее состояние document.readyState:', document.readyState);
             return;
         }
 
@@ -62,132 +64,137 @@ var GameUI = (function() {
         setupMenuListeners();
         setupDifficultyListeners();
         setupPauseListeners();
+        setupSoundListener();
         console.log('GameUI.init() завершен успешно');
     }
 
     function setupMenuListeners() {
-        elements.startButton.onclick = function() {
-            elements.menu.style.display = 'none';
-            GameCore.startGame();
-        };
+        if (elements.startButton) {
+            elements.startButton.onclick = function() {
+                elements.menu.style.display = 'none';
+                if (typeof GameCore !== 'undefined' && GameCore.startGame) {
+                    GameCore.startGame();
+                } else {
+                    console.error('GameCore.startGame не найден');
+                }
+            };
+        }
         
-        elements.difficultyButton.onclick = function() {
-            elements.menu.style.display = 'none';
-            elements.difficultyScreen.style.display = 'flex';
-        };
+        if (elements.difficultyButton) {
+            elements.difficultyButton.onclick = function() {
+                elements.menu.style.display = 'none';
+                elements.difficultyScreen.style.display = 'flex';
+            };
+        }
         
-        elements.exitButton.onclick = function() { 
-            location.reload(); 
-        };
+        if (elements.exitButton) {
+            elements.exitButton.onclick = function() { 
+                location.reload(); 
+            };
+        }
     }
 
     function setupDifficultyListeners() {
-        elements.diffEasy.onclick = function() { 
-            setDifficultyUI('easy'); 
-        };
-        elements.diffNormal.onclick = function() { 
-            setDifficultyUI('normal'); 
-        };
-        elements.diffHard.onclick = function() { 
-            setDifficultyUI('hard'); 
-        };
-        elements.diffBack.onclick = function() {
-            elements.difficultyScreen.style.display = 'none';
-            elements.menu.style.display = 'flex';
-        };
+        if (elements.diffEasy) {
+            elements.diffEasy.onclick = function() { 
+                setDifficultyUI('easy'); 
+            };
+        }
+        if (elements.diffNormal) {
+            elements.diffNormal.onclick = function() { 
+                setDifficultyUI('normal'); 
+            };
+        }
+        if (elements.diffHard) {
+            elements.diffHard.onclick = function() { 
+                setDifficultyUI('hard'); 
+            };
+        }
+        if (elements.diffBack) {
+            elements.diffBack.onclick = function() {
+                elements.difficultyScreen.style.display = 'none';
+                elements.menu.style.display = 'flex';
+            };
+        }
     }
 
     function setDifficultyUI(level) {
-        GameConfig.setDifficulty(level);
+        if (typeof GameConfig !== 'undefined' && GameConfig.setDifficulty) {
+            GameConfig.setDifficulty(level);
+        }
         var labels = { easy: 'Легко', normal: 'Нормально', hard: 'Сложно' };
-        elements.difficultyButton.textContent = 'Сложность: ' + labels[level];
+        if (elements.difficultyButton) {
+            elements.difficultyButton.textContent = 'Сложность: ' + labels[level];
+        }
         elements.difficultyScreen.style.display = 'none';
         elements.menu.style.display = 'flex';
     }
 
     function setupPauseListeners() {
-        elements.resumeButton.onclick = GameCore.resumeGame;
-        elements.pauseExitButton.onclick = function() { 
-            location.reload(); 
-        };
-        elements.restartButton.onclick = function() { 
-            location.reload(); 
-        };
-    }
-
-    function createPlayer() {
-        if (!elements.gameContainer) {
-            console.error('gameContainer не найден при создании игрока');
-            return;
+        if (elements.resumeButton) {
+            elements.resumeButton.onclick = function() {
+                if (typeof GameCore !== 'undefined' && GameCore.resumeGame) {
+                    GameCore.resumeGame();
+                }
+            };
         }
-        
-        var playerDiv = document.createElement('div');
-        playerDiv.className = 'player';
-        playerDiv.style.left = GameState.player().x + 'px';
-        playerDiv.style.top = GameState.player().y + 'px';
-
-        var healthBar = document.createElement('div');
-        healthBar.className = 'health-bar';
-        healthBar.style.width = '100%';
-        playerDiv.appendChild(healthBar);
-
-        var playerGun = document.createElement('div');
-        playerGun.className = 'gun';
-        playerDiv.appendChild(playerGun);
-
-        elements.gameContainer.appendChild(playerDiv);
-        
-        GameState.setPlayerElement(playerDiv, playerGun);
+        if (elements.pauseExitButton) {
+            elements.pauseExitButton.onclick = function() { 
+                location.reload(); 
+            };
+        }
+        if (elements.restartButton) {
+            elements.restartButton.onclick = function() { 
+                location.reload(); 
+            };
+        }
     }
 
-    function createEnemyElement(x, y, health, maxHealth) {
-        if (!elements.gameContainer) return null;
-        
-        var enemyDiv = document.createElement('div');
-        enemyDiv.className = 'enemy';
-        enemyDiv.style.left = x + 'px';
-        enemyDiv.style.top = y + 'px';
-        elements.gameContainer.appendChild(enemyDiv);
-
-        var bar = document.createElement('div');
-        bar.className = 'health-bar';
-        bar.style.width = '100%';
-        enemyDiv.appendChild(bar);
-        
-        return { element: enemyDiv, bar: bar };
+    function setupSoundListener() {
+        if (elements.soundButton) {
+            elements.soundButton.onclick = function() {
+                if (typeof GameConfig !== 'undefined' && GameConfig.SOUND_CONFIG) {
+                    GameConfig.SOUND_CONFIG.enabled = !GameConfig.SOUND_CONFIG.enabled;
+                    elements.soundButton.textContent = GameConfig.SOUND_CONFIG.enabled ? '🔊' : '🔇';
+                }
+            };
+        }
     }
 
-    function createBulletElement(x, y) {
-        if (!elements.gameContainer) return null;
-        
-        var bulletEl = document.createElement('div');
-        bulletEl.className = 'bullet';
-        bulletEl.style.left = x + 'px';
-        bulletEl.style.top = y + 'px';
-        elements.gameContainer.appendChild(bulletEl);
-        return bulletEl;
+    // Функция инициализации canvas (заменяет createPlayer)
+    function initCanvas() {
+        console.log('Инициализация canvas...');
+        if (typeof GameCanvas !== 'undefined' && GameCanvas.init) {
+            GameCanvas.init();
+            GameCanvas.startRenderLoop();
+            console.log('Canvas инициализирован');
+        } else {
+            console.error('GameCanvas не найден');
+        }
     }
 
+    // Функции обновления HUD
     function updateAmmo() {
-        if (elements.ammoIndicator) {
-            elements.ammoIndicator.textContent = 'Патроны: ' + GameState.ammoCount() + '/999';
+        if (elements.ammoIndicator && typeof GameState !== 'undefined') {
+            elements.ammoIndicator.textContent = 'Патроны: ' + (GameState.ammoCount ? GameState.ammoCount() : 999) + '/999';
         }
     }
 
     function updateWave() {
-        if (elements.waveIndicator) {
-            elements.waveIndicator.textContent = 'Волна: ' + GameState.waveNumber();
+        if (elements.waveIndicator && typeof GameState !== 'undefined') {
+            elements.waveIndicator.textContent = 'Волна: ' + (GameState.waveNumber ? GameState.waveNumber() : 1);
         }
     }
 
     function updateKills() {
-        if (elements.killCounter) {
-            elements.killCounter.textContent = 'Убито: ' + GameState.totalKills();
+        if (elements.killCounter && typeof GameState !== 'undefined') {
+            elements.killCounter.textContent = 'Убито: ' + (GameState.totalKills ? GameState.totalKills() : 0);
         }
     }
 
     function updateHealth() {
         if (!elements.playerHpFill || !elements.playerHpValue) return;
+        if (typeof GameState === 'undefined' || !GameState.player) return;
         
         var pct = Math.max(0, GameState.player().health);
         elements.playerHpFill.style.width = pct + '%';
@@ -208,17 +215,20 @@ var GameUI = (function() {
             if (elements.waveAnnounce) {
                 elements.waveAnnounce.style.display = 'none';
             }
-        }, GameConfig.GAME_PARAMS.WAVE_ANNOUNCE_DURATION);
+        }, 2500);
     }
 
     function showGameOver() {
         var gameOverText = document.getElementById('game-over-text');
-        if (gameOverText) {
-            gameOverText.textContent = 'Игра закончена!\nВолна: ' + GameState.waveNumber() + 
-                '\nУбито врагов: ' + GameState.totalKills();
+        if (gameOverText && typeof GameState !== 'undefined') {
+            gameOverText.textContent = 'Игра закончена!\nВолна: ' + (GameState.waveNumber ? GameState.waveNumber() : 1) + 
+                '\nУбито врагов: ' + (GameState.totalKills ? GameState.totalKills() : 0);
         }
         if (elements.gameOverMessage) {
             elements.gameOverMessage.style.display = 'flex';
+        }
+        if (elements.soundToggle) {
+            elements.soundToggle.style.display = 'none';
         }
     }
 
@@ -228,6 +238,10 @@ var GameUI = (function() {
         if (elements.waveIndicator) elements.waveIndicator.style.display = 'block';
         if (elements.killCounter) elements.killCounter.style.display = 'block';
         if (elements.playerHpWrap) elements.playerHpWrap.style.display = 'flex';
+        if (elements.soundToggle) elements.soundToggle.style.display = 'block';
+        
+        // Инициализируем canvas
+        initCanvas();
     }
 
     function hideAllMenus() {
@@ -236,12 +250,16 @@ var GameUI = (function() {
         if (elements.pauseMenu) elements.pauseMenu.style.display = 'none';
     }
 
+    function cleanup() {
+        if (typeof GameCanvas !== 'undefined' && GameCanvas.stopRenderLoop) {
+            GameCanvas.stopRenderLoop();
+        }
+    }
+
+    // Публичный API
     return {
         init: init,
         elements: elements,
-        createPlayer: createPlayer,
-        createEnemyElement: createEnemyElement,
-        createBulletElement: createBulletElement,
         updateAmmo: updateAmmo,
         updateWave: updateWave,
         updateKills: updateKills,
@@ -249,6 +267,7 @@ var GameUI = (function() {
         showWaveAnnounce: showWaveAnnounce,
         showGameOver: showGameOver,
         showGameUI: showGameUI,
-        hideAllMenus: hideAllMenus
+        hideAllMenus: hideAllMenus,
+        cleanup: cleanup
     };
 })();

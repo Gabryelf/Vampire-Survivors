@@ -1,4 +1,3 @@
-
 // ============================================================
 // core.js - Главный цикл игры
 // ============================================================
@@ -38,7 +37,6 @@ var GameCore = (function() {
         GameUI.showGameUI();
         GameUI.hideAllMenus();
         
-        GameUI.createPlayer();
         GameUI.updateAmmo();
         GameUI.updateKills();
         GameUI.updateHealth();
@@ -115,5 +113,3 @@ var GameCore = (function() {
         resumeGame: resumeGame
     };
 })();
-
-

@@ -13,15 +13,11 @@ var GameAI = (function() {
         if (edge === 1) { x = GameState.windowWidth(); y = Math.random() * GameState.windowHeight(); }
         if (edge === 2) { x = Math.random() * GameState.windowWidth(); y = GameState.windowHeight(); }
         if (edge === 3) { x = 0; y = Math.random() * GameState.windowHeight(); }
-
-        var uiElements = GameUI.createEnemyElement(x, y, diff.enemyHealth, diff.enemyHealth);
-        
+    
         var role = GameConfig.ROLES[Math.floor(Math.random() * GameConfig.ROLES.length)];
         var flankSide = Math.random() < 0.5 ? 1 : -1;
-
+    
         GameState.addEnemy({
-            element: uiElements.element,
-            bar: uiElements.bar,
             posX: x,
             posY: y,
             width: GameConfig.GAME_PARAMS.ENEMY_SIZE,
@@ -37,7 +33,7 @@ var GameAI = (function() {
         if (GameState.ammoCount() <= 0) return;
         if (Date.now() - GameState.lastShotTime() < GameConfig.getDifficulty().fireRate) return;
         if (GameState.enemies().length === 0) return;
-
+    
         var nearest = null;
         var minDist = Infinity;
         var enemies = GameState.enemies();
@@ -52,27 +48,31 @@ var GameAI = (function() {
             }
         }
         if (!nearest) return;
-
+    
         var angle = Math.atan2(nearest.posY - player.y, nearest.posX - player.x);
-        if (player.gun) {
-            player.gun.style.transform = 'rotate(' + (angle * 180 / Math.PI) + 'deg)';
+        
+        // Сохраняем угол для отрисовки
+        if (typeof GameState.setGunAngle === 'function') {
+            GameState.setGunAngle(angle);
         }
-
-        var bulletEl = GameUI.createBulletElement(player.x + 10, player.y + 10);
-
+    
+        // Создаем пулю без DOM-элемента
         GameState.addBullet({
-            element: bulletEl,
             posX: player.x + 10,
             posY: player.y + 10,
             dx: GameConfig.GAME_PARAMS.BULLET_SPEED * Math.cos(angle),
             dy: GameConfig.GAME_PARAMS.BULLET_SPEED * Math.sin(angle),
             width: GameConfig.GAME_PARAMS.BULLET_SIZE,
-            height: GameConfig.GAME_PARAMS.BULLET_SIZE,
+            height: GameConfig.GAME_PARAMS.BULLET_SIZE
         });
-
+    
         GameState.setAmmoCount(GameState.ammoCount() - 1);
         GameState.setLastShotTime(Date.now());
         GameUI.updateAmmo();
+        
+        if (typeof GameSound !== 'undefined') {
+            GameSound.play('shoot');
+        }
     }
 
     function moveBullets() {
@@ -81,12 +81,11 @@ var GameAI = (function() {
             var b = bullets[i];
             b.posX += b.dx;
             b.posY += b.dy;
-            b.element.style.left = b.posX + 'px';
-            b.element.style.top = b.posY + 'px';
 
-            if (b.posX < 0 || b.posX > GameState.windowWidth() || 
-                b.posY < 0 || b.posY > GameState.windowHeight()) {
-                b.element.remove();
+            // Проверяем выход за границы
+            if (b.posX < -50 || b.posX > GameState.windowWidth() + 50 || 
+                b.posY < -50 || b.posY > GameState.windowHeight() + 50) {
+                // Удаляем пулю без вызова element.remove()
                 GameState.removeBullet(i);
             }
         }
@@ -158,21 +157,21 @@ var GameAI = (function() {
         var player = GameState.player();
         
         separateEnemies();
-
+    
         var enemies = GameState.enemies();
         var bullets = GameState.bullets();
-
+    
         for (var i = enemies.length - 1; i >= 0; i--) {
             var e = enemies[i];
             var distToPlayer = Math.hypot(e.posX - player.x, e.posY - player.y);
-
+    
             var target;
             if (distToPlayer < 50) {
                 target = { tx: player.x, ty: player.y };
             } else {
                 target = getTarget(e, velX, velY);
             }
-
+    
             var ex = target.tx - e.posX;
             var ey = target.ty - e.posY;
             var elen = Math.hypot(ex, ey);
@@ -181,43 +180,45 @@ var GameAI = (function() {
                 e.posX += (ex / elen) * diff.enemySpeed;
                 e.posY += (ey / elen) * diff.enemySpeed;
             }
-            
-            e.element.style.left = e.posX + 'px';
-            e.element.style.top = e.posY + 'px';
-
+    
             // Урон при касании
             if (distToPlayer < 20) {
                 var playerDied = GameState.takeDamage(diff.damagePerHit);
                 GameUI.updateHealth();
                 
                 if (playerDied) {
-                    return true; // Игрок умер
+                    return true;
                 }
                 var ang = Math.atan2(e.posY - player.y, e.posX - player.x);
                 e.posX += Math.cos(ang) * 28;
                 e.posY += Math.sin(ang) * 28;
             }
-
+    
             // Проверка попаданий
             for (var j = bullets.length - 1; j >= 0; j--) {
                 var b = bullets[j];
                 if (checkCollision(b, e)) {
                     e.health -= GameConfig.GAME_PARAMS.BULLET_DAMAGE;
-                    e.bar.style.width = Math.max(0, (e.health / e.maxHealth) * 100) + '%';
-                    b.element.remove();
-                    GameState.removeBullet(j);
                     
                     if (e.health <= 0) {
-                        e.element.remove();
                         GameState.removeEnemy(i);
                         GameWaves.onEnemyDefeated();
                         GameUI.updateKills();
+                        if (typeof GameSound !== 'undefined') {
+                            GameSound.play('enemyDeath');
+                        }
+                        break; // Враг мертв, выходим из цикла проверки пуль
                     }
-                    break;
+                    // Удаляем пулю
+                    GameState.removeBullet(j);
+                    if (typeof GameSound !== 'undefined') {
+                        GameSound.play('hit');
+                    }
+                    break; // Пуля попала, выходим из цикла проверки пуль для этого врага
                 }
             }
         }
-        return false; // Игрок жив
+        return false;
     }
 
     return {

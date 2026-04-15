@@ -1,6 +1,5 @@
-/* Общие стили */
+/* Общий сброс и body */
 body {
-    font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     background-color: #f0f0f0;
@@ -9,135 +8,115 @@ body {
     align-items: center;
     height: 100vh;
     overflow: hidden;
+    font-family: Arial, sans-serif;
 }
 
-
-/* Стили для меню */
+/* Карточка меню (главное, сложность, пауза) */
 .menu {
     position: absolute;
     text-align: center;
-    background-color: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.7);
     color: white;
-    padding: 50px;
+    padding: 30px;
     border-radius: 10px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    width: 300px;
-    height: 300px;
+    width: 260px;
+    z-index: 200;
 }
-
 .menu h1 {
-    margin-bottom: 30px;
-    font-size: 2em;
+    margin-bottom: 20px;
 }
 
+/* Кнопки */
 button {
-    padding: 15px;
-    margin: 10px;
-    font-size: 1.2em;
-    background-color: #007bff;
+    padding: 12px 20px;
+    margin: 8px 0;
+    font-size: 1.1em;
+    background: #007bff;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
 }
-
 button:hover {
-    background-color: #0056b3;
+    background: #0056b3;
 }
 
-
-
-/* стили для игрового контейнера! */
-/* Настройки основного окна */
+/* Игровой контейнер (для Canvas) */
 .game-container {
     width: 100%;
     height: 100%;
     background-color: #2d2d2d;
     position: fixed;
-    display: none; /* Изначально скрыт */
+    display: none; /* Показывается JS при старте */
 }
 
-/* Игрок */
-.player {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: blue;
-    z-index: 2;
+/* HUD — индикаторы */
+#ammo-indicator,
+#wave-indicator,
+#kill-counter {
+    font-size: 16px;
+    color: white;
+    padding: 8px 12px;
+    background: rgba(0, 0, 0, 0.7);
+    position: fixed;
+    z-index: 50;
+    border-radius: 5px;
 }
+#ammo-indicator { right: 12px; top: 12px; }
+#wave-indicator { left: 12px; top: 12px; }
+#kill-counter { left: 50%; top: 12px; transform: translateX(-50%); min-width: 100px; }
 
-.gun {
-    position: absolute;
+/* Баннер волны */
+#wave-announce {
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 10px;
-    height: 10px;
-    background-color: red;
-    transition: all 0.1s ease-in-out;
-}
-
-/* Полоска здоровья игрока */
-.health-bar {
-    position: absolute;
-    bottom: -10px;
-    left: 0;
-    width: 100%;
-    height: 5px;
-    background-color: green;
-    transition: width 0.1s linear;
-}
-
-/* Элементы противника */
-.enemy {
-    position: absolute;
-    width: 20px;
-    height: 20px;
-    background-color: darkred;
-    z-index: 1;
-}
-
-.dead-enemy {
-    opacity: 0;
+    font-size: 32px;
+    color: white;
+    background: rgba(0, 0, 0, 0.75);
+    padding: 15px 30px;
+    border-radius: 8px;
+    z-index: 60;
     pointer-events: none;
 }
 
-/* Пуля */
-.bullet {
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    background-color: black;
-    z-index: 3;
-}
-
-/* Индикация количества боеприпасов */
-#ammo-indicator {
-    font-size: 18px;
-    color: white;
-    padding: 10px;
-    text-align: center;
-    background-color: rgba(0, 0, 0, 0.7);
-    position: fixed;
-    right: 10px;
-    top: 10px;
-}
-
-/* Окончание игры */
+/* Экран окончания игры */
 #game-over-message {
-    display: block;
-    position: absolute;
-    top: calc(50% - 50px);
-    left: calc(50% - 100px);
-    width: 200px;
-    height: 100px;
-    line-height: 100px;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 240px;
+    padding: 25px;
     text-align: center;
-    font-size: 24px;
     color: white;
-    background-color: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.85);
     z-index: 100;
+    border-radius: 10px;
+}
+#game-over-text {
+    font-size: 20px;
+}
+
+/* Полоска здоровья игрока (HUD) */
+#player-healthbar-wrap {
+    position: fixed;
+    left: 50%;
+    bottom: 16px;
+    transform: translateX(-50%);
+    z-index: 50;
+}
+#player-healthbar-bg {
+    width: min(48vw, 180px);
+    height: 16px;
+    background: #333;
+    border-radius: 8px;
+}
+#player-healthbar-fill {
+    height: 100%;
+    background-color: #2ecc40; /* Зелёный по умолчанию */
 }

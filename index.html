@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -30,24 +31,44 @@
         <button id="resume-button">Продолжить</button>
         <button id="pause-exit-button">Выход в меню</button>
     </div>
+    <!-- Окно выбора улучшения (появляется при повышении уровня) -->
+    <div id="upgrade-screen" class="menu" style="display:none;">
+        <h2>Повышение уровня!</h2>
+        <p>Выберите улучшение:</p>
+        <div id="upgrade-options" style="display: flex; gap: 20px; justify-content: center; margin: 20px;">
+            <!-- Сюда динамически добавятся 3 кнопки улучшений -->
+        </div>
+        <button id="upgrade-close" style="display:none;">Продолжить</button>
+    </div>
 
     <!-- Игровой контейнер — область игры. -->
     <div id="game-container" class="game-container"></div>
 
     <!-- HUD: патроны, волна, счётчик убийств, баннер волны -->
-    <div id="ammo-indicator" style="display:none;">Патроны: 999/999</div>
+   
     <div id="wave-indicator" style="display:none;">Волна: 1</div>
     <div id="kill-counter"   style="display:none;">Убито: 0</div>
     <div id="wave-announce"  style="display:none;"></div>
 
     <!-- Полоса здоровья игрока — внизу по центру -->
-    <div id="player-healthbar-wrap" style="display:none;">
+    <div id="player-healthbar-wrap" style="display:none;">n
         <span id="player-hp-label">HP</span>
         <div id="player-healthbar-bg">
             <div id="player-healthbar-fill"></div>
         </div>
-        <span id="player-hp-value">100</span>
+        <span id="player-hp-value">100/100</span>
     </div>
+
+    <!-- Полоса опыта игрока -->
+    <div id="experience-bar-wrap" style="display:none;">
+        <span id="level-indicator">Уровень: 1</span>
+        <div id="experience-bar-bg">
+            <div id="exp-indicator"></div>
+        </div>
+    </div>
+
+    <!-- Сообщение о повышении уровня -->
+    <div id="level-up-message" style="display:none;">Уровень 2!</div>
 
     <!-- Экран окончания игры — показывается при смерти игрока -->
     <div id="game-over-message" style="display:none;">
@@ -56,16 +77,21 @@
     </div>
 
     <!-- Подключаем скрипты в правильном порядке -->
-    <script src="config.js"></script>
-    <script src="state.js"></script>
-    <script src="ui.js"></script>
-    <script src="hero.js"></script>
-    <script src="ai.js"></script>
-    <script src="waves.js"></script>
-    <script src="qa.js"></script>
-    <script src="core.js"></script>
+    <script src="js/config/config.js"></script>
+    <script src="js/audio/sound.js"></script>
+    <script src="js/state/state.js"></script>
+    <script src="js/effects/particles.js"></script>
+    <script src="js/ui/ui.js"></script>
+    <script src="js/core/hero.js"></script>
+    <script src="js/state/ai.js"></script>
+    <script src="js/core/waves.js"></script>
+    <script src="js/renderer/graphics.js"></script>
+    <script src="js/renderer/canvas.js"></script>
+    <script src="js/core/core.js"></script>
+    <script src="js/core/qa.js"></script>
+    <script src="js/main.js"></script>
     
-    <!-- Инициализация после загрузки всех скриптов -->
+   <!-- Инициализация после загрузки всех скриптов -->
     <script>
         window.onload = function() {
             console.log('Страница полностью загружена, инициализируем игру...');
@@ -78,3 +104,4 @@
     </script>
 </body>
 </html>
+<!--69 -->
