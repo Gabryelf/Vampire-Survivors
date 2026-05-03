@@ -8,6 +8,7 @@ class ParticleSystem {
     this.particles = [];
     this.xpGems   = [];
     this.maxParticles = 400;
+    this.healOrbs = [];
   }
 
   // ---- Spawn effects ----
@@ -162,38 +163,87 @@ class ParticleSystem {
     });
   }
 
+  addHealOrb(x, y) {
+    this.healOrbs.push({
+      x, y,                           // Позиция
+      vx: Utils.rand(-20, 20),        // Случайная скорость по X
+      vy: Utils.rand(-40, -10),       // Случайная скорость по Y (вверх)
+      r: 8,                           // Радиус
+      healAmount: 15,                 // Количество восстанавливаемого HP
+      life: 20,                       // Время жизни в секундах
+      bobOffset: Math.random() * Math.PI * 2,  // Фаза покачивания
+      bobSpeed: Utils.rand(2, 4)               // Скорость покачивания
+    });
+  }
+
   // ---- Update ----
-  update(dt) {
-    // Update particles
-    for (let i = this.particles.length - 1; i >= 0; i--) {
-      const p = this.particles[i];
-      p.x += p.vx * dt;
-      p.y += p.vy * dt;
-      if (p.gravity) p.vy += p.gravity * dt;
-      p.vx *= (1 - dt * 3);
-      p.vy *= (1 - dt * 3);
-      p.life -= dt;
-      if (p.life <= 0) { this.particles.splice(i, 1); continue; }
-    }
+update(dt, player = null, ui = null) {
+  // Update particles
+  for (let i = this.particles.length - 1; i >= 0; i--) {
+    const p = this.particles[i];
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    if (p.gravity) p.vy += p.gravity * dt;
+    p.vx *= (1 - dt * 3);
+    p.vy *= (1 - dt * 3);
+    p.life -= dt;
+    if (p.life <= 0) { this.particles.splice(i, 1); continue; }
+  }
 
-    // Trim if too many
-    if (this.particles.length > this.maxParticles) {
-      this.particles.splice(0, this.particles.length - this.maxParticles);
-    }
+  // Trim if too many
+  if (this.particles.length > this.maxParticles) {
+    this.particles.splice(0, this.particles.length - this.maxParticles);
+  }
 
-    // Update XP gems
-    for (let i = this.xpGems.length - 1; i >= 0; i--) {
-      const g = this.xpGems[i];
-      if (g.collected) { this.xpGems.splice(i, 1); continue; }
-      g.x  += g.vx * dt;
-      g.y  += g.vy * dt;
-      g.vy += 40 * dt; // gentle gravity
-      g.vx *= (1 - dt * 2);
-      g.vy *= (1 - dt * 2);
-      g.life -= dt;
-      if (g.life <= 0) { this.xpGems.splice(i, 1); }
+  // Update XP gems
+  for (let i = this.xpGems.length - 1; i >= 0; i--) {
+    const g = this.xpGems[i];
+    if (g.collected) { this.xpGems.splice(i, 1); continue; }
+    g.x += g.vx * dt;
+    g.y += g.vy * dt;
+    g.vy += 40 * dt;
+    g.vx *= (1 - dt * 2);
+    g.vy *= (1 - dt * 2);
+    g.life -= dt;
+    if (g.life <= 0) { this.xpGems.splice(i, 1); }
+  }
+
+  // Обновление сфер здоровья - С ПРОВЕРКОЙ СТОЛКНОВЕНИЯ
+  for (let i = this.healOrbs.length - 1; i >= 0; i--) {
+    const h = this.healOrbs[i];
+    
+    // Физика падения
+    h.x += h.vx * dt;
+    h.y += h.vy * dt;
+    h.vy += 40 * dt;
+    h.vx *= (1 - dt * 2);
+    h.vy *= (1 - dt * 2);
+    h.life -= dt;
+    
+    // Удаление если время жизни истекло
+    if (h.life <= 0) {
+      this.healOrbs.splice(i, 1);
+      continue;
+    }
+    
+    // ПРОВЕРКА СТОЛКНОВЕНИЯ С ИГРОКОМ
+    if (player && Utils.dist(h.x, h.y, player.x, player.y) < player.radius + h.r) {
+      // Восстанавливаем здоровье
+      const healed = player.heal(h.healAmount);
+      
+      // Визуальный эффект
+      this.spawnHealEffect(player.x, player.y);
+      
+      // Текст восстановления
+      if (ui) {
+        ui.spawnFloatText(`+${h.healAmount} HP`, player.x, player.y - 30, 'heal');
+      }
+      
+      // Удаляем сферу
+      this.healOrbs.splice(i, 1);
     }
   }
+}
 
   // ---- Draw ----
   draw(ctx, camX, camY, W, H) {
@@ -257,6 +307,28 @@ class ParticleSystem {
       ctx.closePath();
       ctx.fill();
 
+      ctx.restore();
+    }
+  
+    // Отрисовка сфер здоровья
+    for (const h of this.healOrbs) {
+      const sx = h.x - camX + W/2;
+      const sy = h.y - camY + H/2;
+      const bob = Math.sin(now * h.bobSpeed + h.bobOffset) * 2;
+      
+      ctx.save();
+      ctx.shadowBlur = 10;
+      ctx.shadowColor = '#ff6b6b';
+      ctx.fillStyle = '#ff6b6b';
+      ctx.beginPath();
+      ctx.arc(sx, sy + bob, h.r, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#fff';
+      ctx.font = `${h.r}px sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('❤️', sx, sy + bob);
       ctx.restore();
     }
   }

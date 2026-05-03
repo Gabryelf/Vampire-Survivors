@@ -39,49 +39,49 @@ const CONFIG = {
       id: 'BAT', name: 'Летучая мышь', emoji: '🦇',
       hp: 18, speed: 130, damage: 8, xp: 2, radius: 10,
       color: '#6a0dad', colorInner: '#9030d0',
-      scoreValue: 10
+      scoreValue: 10, healDropChance: 0.03, magnetDropChance: 0.01
     },
     SKELETON: {
       id: 'SKELETON', name: 'Скелет', emoji: '💀',
       hp: 45, speed: 75, damage: 15, xp: 5, radius: 14,
       color: '#c8b87a', colorInner: '#ddd0a0',
-      scoreValue: 20
+      scoreValue: 20, healDropChance: 0.03, magnetDropChance: 0.01
     },
     ZOMBIE: {
       id: 'ZOMBIE', name: 'Зомби', emoji: '🧟',
       hp: 80, speed: 55, damage: 20, xp: 8, radius: 16,
       color: '#2d5a2d', colorInner: '#4a8a4a',
-      scoreValue: 30
+      scoreValue: 30, healDropChance: 0.03, magnetDropChance: 0.01
     },
     GHOST: {
       id: 'GHOST', name: 'Призрак', emoji: '👻',
       hp: 30, speed: 100, damage: 12, xp: 6, radius: 13,
       color: 'rgba(150,180,255,0.7)', colorInner: 'rgba(200,220,255,0.9)',
-      scoreValue: 25, phasing: true
+      scoreValue: 25, phasing: true, healDropChance: 0.03, magnetDropChance: 0.01
     },
     ORC: {
       id: 'ORC', name: 'Орк', emoji: '👹',
       hp: 200, speed: 50, damage: 30, xp: 20, radius: 22,
       color: '#2a5a10', colorInner: '#50a030',
-      scoreValue: 80
+      scoreValue: 80, healDropChance: 0.03, magnetDropChance: 0.01
     },
     VAMPIRE: {
       id: 'VAMPIRE', name: 'Вампир', emoji: '🧛',
       hp: 120, speed: 95, damage: 25, xp: 15, radius: 16,
       color: '#8b0000', colorInner: '#c0152a',
-      scoreValue: 60
+      scoreValue: 60, healDropChance: 0.03, magnetDropChance: 0.01
     },
     DEMON: {
       id: 'DEMON', name: 'Демон', emoji: '😈',
       hp: 350, speed: 70, damage: 40, xp: 40, radius: 24,
       color: '#8b0000', colorInner: '#ff2222',
-      scoreValue: 150, isBoss: true
+      scoreValue: 150, isBoss: true, healDropChance: 0.03, magnetDropChance: 0.01
     },
     LICH: {
       id: 'LICH', name: 'Лич', emoji: '☠️',
       hp: 600, speed: 60, damage: 50, xp: 80, radius: 28,
       color: '#3a0070', colorInner: '#9000ff',
-      scoreValue: 300, isBoss: true
+      scoreValue: 300, isBoss: true, healDropChance: 0.03, magnetDropChance: 0.01
     }
   },
 

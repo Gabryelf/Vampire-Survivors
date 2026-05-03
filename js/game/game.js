@@ -222,8 +222,7 @@ class Game {
     // Enemies + weapons
     this.enemies.update(dt, this.player, this.particles, this);
     this.weapons.update(dt, this.player, this.enemies.enemies, this.particles, this);
-    this.particles.update(dt);
-
+    this.particles.update(dt, this.player, this.ui);
     // Camera smooth follow
     this.camX = Utils.lerp(this.camX, this.player.x, CONFIG.CAM_LERP);
     this.camY = Utils.lerp(this.camY, this.player.y, CONFIG.CAM_LERP);

@@ -135,7 +135,7 @@ class Player {
     this.y = Utils.clamp(this.y, -CONFIG.WORLD_H / 2, CONFIG.WORLD_H / 2);
   }
 
-draw(ctx, camX, camY, W, H) {
+  draw(ctx, camX, camY, W, H) {
     const sprite = SpriteLoader.get('player');
     const gunSprite = SpriteLoader.get('playerGun');
     
@@ -144,82 +144,6 @@ draw(ctx, camX, camY, W, H) {
         this._drawFallback(ctx, camX, camY, W, H);
         return;
     }
-    
-    const sx = this.x - camX + W / 2;
-    const sy = this.y - camY + H / 2;
-    
-    ctx.save();
-    
-    // Тень
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.beginPath();
-    ctx.ellipse(sx, sy + this.radius * 0.5, this.radius * 0.8, this.radius * 0.3, 0, 0, Math.PI * 2);
-    ctx.fill();
-    
-    // I-frame мерцание
-    const now = performance.now() * 0.001;
-    if (this.invincible && Math.floor(now * 12) % 2 === 0) {
-        ctx.restore();
-        return;
-    }
-    
-    // Аура
-    if (this.invincible) {
-        ctx.shadowBlur = 20;
-        ctx.shadowColor = '#c0152a';
-    }
-    
-    ctx.translate(sx, sy);
-    
-    if (this.facing === -1) ctx.scale(-1, 1);
-    
-    ctx.drawImage(sprite, -this.radius, -this.radius, this.radius * 2, this.radius * 2);
-    
-    if (gunSprite) {
-        ctx.rotate(this.lastDir);
-        ctx.drawImage(gunSprite, -5, -8, 12, 16);
-    }
-    
-    ctx.restore();
-    
-    this._drawHealthBar(ctx, sx, sy - this.radius - 5, this.radius * 2, 4, this.hp, this.maxHp);
-    
-    // Garlic аурa
-    const garlicWeapon = this.weapons.find(w => w.data.id === 'GARLIC');
-    if (garlicWeapon) {
-        ctx.save();
-        ctx.strokeStyle = `rgba(100,255,100,${0.3 + 0.1 * Math.sin(now * 4)})`;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.arc(sx, sy, garlicWeapon.range, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-    }
-}
-
-_drawFallback(ctx, camX, camY, W, H) {
-    const sx = this.x - camX + W / 2;
-    const sy = this.y - camY + H / 2;
-    
-    ctx.save();
-    ctx.fillStyle = '#c0152a';
-    ctx.shadowBlur = 15;
-    ctx.beginPath();
-    ctx.arc(sx, sy, this.radius, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-    
-    this._drawHealthBar(ctx, sx, sy - this.radius - 5, this.radius * 2, 4, this.hp, this.maxHp);
-}
-
-_drawHealthBar(ctx, x, y, w, h, current, max) {
-    const pct = Math.min(1, Math.max(0, current / max));
-    ctx.fillStyle = 'rgba(0,0,0,0.6)';
-    ctx.fillRect(x - w/2, y, w, h);
-    const color = pct > 0.5 ? '#2ecc71' : (pct > 0.25 ? '#f39c12' : '#c0152a');
-    ctx.fillStyle = color;
-    ctx.fillRect(x - w/2, y, w * pct, h);
-}
     
     const sx = this.x - camX + W / 2;
     const sy = this.y - camY + H / 2;
